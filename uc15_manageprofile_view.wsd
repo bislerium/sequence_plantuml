@@ -1,0 +1,31 @@
+@startuml uc1-sequence
+skinparam sequenceMessageAlign center
+actor       "General People"       as actor
+boundary    UserInfoTab    as ui
+control     ProfileProvider  as provider
+entity      DjangoServer      as server
+
+activate  ui
+actor -> ui: clickNGO()
+ui -> provider: initFetchUser(people_id)
+activate provider
+ui -> ui: build()
+activate ui
+provider -> server: GET api/people/<people_id>/
+activate server
+return response
+provider --> ui: success
+deactivate provider
+ui -> provider: getUserData
+activate provider
+return PeopleModel
+alt PeopleModel = null
+    ui -> ui: ErrorView()
+else
+    ui -> ui: PeopleProfile()
+    activate ui
+    create PeopleProfile
+    ui-> PeopleProfile: <<build>>
+    deactivate ui
+end
+@enduml

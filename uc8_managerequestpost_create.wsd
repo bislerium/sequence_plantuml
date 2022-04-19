@@ -34,7 +34,7 @@ alt validate = true
     alt success = false
         ui -> ui: showSnackBar(error: true)
     else
-        ui -> ui: showSnackBar(error: false)
+        ui -> ui: showSnackBar()
         ui -> ui: Navigator.pop()
         deactivate ui
         destroy ui

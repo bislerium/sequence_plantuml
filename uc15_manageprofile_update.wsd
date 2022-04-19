@@ -1,0 +1,46 @@
+@startuml uc1-sequence
+skinparam sequenceMessageAlign center
+actor       "General People"       as actor
+boundary    PeopleProfileEditScreen    as ui
+control     PeopleProvider  as provider
+entity      DjangoServer      as server
+
+activate  ui
+ui -> provider: retrieveUpdatePeople()
+activate provider
+ui -> ui: build()
+activate ui
+provider  -> server: GET api/people/detail/
+activate server
+return responses
+provider -> ui: success
+deactivate provider
+alt success = false
+    ui -> ui: ErrorView()
+else
+    ui -> ui: PeopleProfileEditForm()
+    opt
+        actor -> ui: fillForm()
+    end
+    actor -> ui: updateButton()
+    ui -> ui: form.validate()
+    alt validate = true
+        ui -> ui: form.save()
+        ui -> provider: updatePeople()
+        activate provider
+        provider -> server: PUT api/people/update/
+        activate server
+        server --> provider: response
+        deactivate server
+        return success
+        alt success = false
+            ui -> ui: showSnackBar(error: true)
+        else
+            ui -> ui: showSnackBar(error: false)
+            ui -> ui: Navigator.pop()
+            deactivate ui
+            destroy ui
+        end
+    end
+end
+@enduml

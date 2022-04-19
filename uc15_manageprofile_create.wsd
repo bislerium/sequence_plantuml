@@ -1,28 +1,21 @@
 @startuml uc1-sequence
 skinparam sequenceMessageAlign center
-actor       "Mobile User"       as actor
-boundary    PostCreateFormScreen    as ui
-control     PostCreateProvider  as provider
+actor       "General People"       as actor
+boundary    RegisterScreen    as ui
+control     PeopleProvider  as provider
 entity      DjangoServer      as server
 
 activate  ui
 ui -> ui: build()
 activate ui
-actor -> ui: selectNormalPostTab()
-actor -> ui: selectRelatedTo()
-actor -> ui: enterPostContent()
-opt
-    actor -> ui: pokeNGO()
-    actor -> ui: togglePostAnonymous()
-    actor -> ui: uploadImage()
-end
-actor -> ui: postButton()
+actor -> ui: fillForm()
+actor -> ui: registerButton()
 ui -> ui: form.validate()
 alt validate = true
     ui -> ui: form.save()
-    ui -> provider: createNormalPost()
+    ui -> provider: registerPeople()
     activate provider
-    provider -> server: POST api/post/normal/
+    provider -> server: POST api/people/add/
     activate server
     server --> provider: response
     deactivate server

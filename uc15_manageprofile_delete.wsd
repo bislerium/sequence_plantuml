@@ -1,14 +1,11 @@
 @startuml uc1-sequence
 skinparam sequenceMessageAlign center
-actor       "Mobile User"       as actor
-boundary    PostCard    as ui
-control     ProfileProvider  as provider
+actor       "General People"       as actor
+boundary    UserInfoTab    as ui
+control     AuthProvider  as provider
 entity      DjangoServer      as server
 
 activate ui
-ui -> ui: build()
-activate ui
-actor -> ui: longPress()
 ui -> ui: showDialog()
 activate ui
 alt Cancel
@@ -17,9 +14,9 @@ alt Cancel
 
 else Ok
     actor -> ui: clickOK()
-    ui -> provider: deletePost(<post_id>)
+    ui -> provider: deleteUser()
     activate provider
-    provider -> server: DELETE api/post/<post_id>/delete/
+    provider -> server: DELETE api/people/delete/
     activate server
     return response
     return success
@@ -28,8 +25,6 @@ else Ok
     else
         ui -> ui: showSnackBar()
         ui -> ui: Navigator.pop()
-        deactivate ui
-        destroy ui
     end
 end
 @enduml

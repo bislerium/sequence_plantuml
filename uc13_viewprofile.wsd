@@ -25,7 +25,7 @@ else
     ui -> ui: NGOProfile()
     activate ui
     create NGOProfile
-    ui-> NGOProfile: <<create>>
+    ui-> NGOProfile: <<build>>
     deactivate ui
 end
 @enduml
