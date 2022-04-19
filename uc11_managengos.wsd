@@ -1,0 +1,83 @@
+@startuml Manage WeeklyLog
+skinparam sequenceMessageAlign center
+
+actor       "Web User" as actor
+boundary    Browser as ui
+control     NGOReadsView as rsv
+control     NGOCreateView as cv
+control     NGOReadView as rv
+control     NGOUpdateView as uv
+control     NGODeleteView as dv
+entity      NGOModel as model
+database    Database as db
+
+activate ui
+group Read NGOs
+
+    actor -> ui: enter url
+    ui -> rsv: GET web/ngos/
+    activate rsv
+    rsv -> model: NGO.objects.all()
+    activate model
+    model -> db: select_query()
+    activate db
+    return records
+    return
+    rsv -> rsv: render_to_response()
+    return ngo-reads.html
+end
+
+group Register NGO
+    cv -> ui: ngo-create.html
+    activate cv
+    actor -> ui: fill register form
+    ui -> cv: POST web/ngos/add/
+    cv -> model: <<create>>
+    activate model
+    model -> db: insert_query()
+    activate db
+    deactivate model
+    deactivate db
+    cv --> rv: HttpResponseRedirect()
+    deactivate cv
+    activate rv
+    rv -> ui: ngo-read.html
+    deactivate rv
+end
+
+
+group Update NGO
+    uv -> ui: ngo-update.html
+    activate uv
+    actor -> ui: fill update form
+    ui -> uv: POST web/ngo/<nngo_id>/edit/
+    uv -> model: NGO.objects.update()
+    activate model
+    model -> db: alter_query()
+    activate db
+    deactivate model
+    deactivate db
+    uv --> rv: HttpResponseRedirect()
+    deactivate uv
+    activate rv
+    rv -> ui: ngo-read.html
+    deactivate rv
+end
+
+group Delete NGO
+    actor -> ui: click delete button
+    ui -> dv: DELETE web/ngo/<ngo_id>/remove/
+    activate dv
+    dv -> model: NGO.objects.remove()
+    activate model
+    model -> db: delete_query()
+    activate db
+    deactivate model
+    deactivate db
+    dv --> rsv: HttpResponseRedirect()
+    deactivate dv
+    activate rsv
+    rsv -> ui: ngo-reads.html
+    deactivate rsv
+end
+@enduml

@@ -1,0 +1,30 @@
+@startuml uc1-sequence
+skinparam sequenceMessageAlign center
+actor       "Admin"       as actor
+boundary    Browser    as ui
+control     ReportReadView  as view
+entity      ReportModel      as model
+database    Database as db
+
+activate ui
+actor -> ui: enter url
+ui -> view: GET web/reports/
+activate view
+view -> view: dispatch()
+view -> view: get_queryset()
+activate view
+view -> model: Report.objects.all()
+activate model
+loop
+    model -> db: get_query()
+    activate db
+    return record
+    return ReportModel
+end
+deactivate view
+alt Http404 Exception
+    view --> ui: HTTP 404: Page not found
+else
+    view -> view: get_context_data()\nrender_to_response()
+    view --> ui: reports-read.html
+end

@@ -1,0 +1,42 @@
+@startuml uc1-sequence
+skinparam sequenceMessageAlign center
+actor       "Mobile User"       as actor
+boundary    NGOPage    as ui
+control     NGOProvider  as provider
+entity      DjangoServer      as server
+
+actor -> ui: click()
+activate  ui
+ui --> provider: fetchNGOs()
+ui -> ui: build()
+activate ui
+activate provider
+provider -> server: POST api/ngos/
+activate server
+return response
+    alt response = success
+        loop response.json.object.count
+            create NGOModel as ngo
+            provider -> ngo: <<create>>
+            provider -> provider: append()
+        end
+        provider -> provider: _ngosToShow = List<NGOModel>
+    else
+        provider -> provider: _ngosToShow = null
+    end
+ui -> provider: getIsFetchError()
+provider --> ui: bool
+alt bool = true
+    ui -> ui: ErrorView()
+else
+    ui -> provider: getNGOs()
+    provider --> ui: List<NGOModel>
+    alt Empty List
+        ui->ui: showEmptyMessage()
+    else
+    ui -> ui: NGOList()
+    create NGOList
+    ui -> NGOList: <<build>>
+    end
+end
+@enduml

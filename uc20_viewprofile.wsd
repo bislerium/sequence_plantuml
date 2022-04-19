@@ -1,0 +1,28 @@
+@startuml uc1-sequence
+skinparam sequenceMessageAlign center
+actor       "Staff"       as actor
+boundary    Browser    as ui
+control     StaffReadView  as view
+entity      StaffModel      as model
+database    Database as db
+
+activate ui
+actor -> ui: Click "view profile"
+ui -> view: GET web/staff/<staff_id>/
+activate view
+view -> view: dispatch()
+view -> view: get_object()
+activate view
+view -> model: Staff.objects.get(pk=staff_id)
+activate model
+model -> db: get_query()
+activate db
+return record
+return StaffModel
+deactivate view
+alt Http404 Exception
+    view --> ui: HTTP 404: Page not found
+else
+    view -> view: get_context_data()\nrender_to_response()
+    view --> ui: staff-profile-page.html
+end

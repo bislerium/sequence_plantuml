@@ -1,0 +1,33 @@
+@startuml uc1-sequence
+skinparam sequenceMessageAlign center
+actor       "Mobile User"       as actor
+boundary    NormalPostScreen    as ui
+control     NormalPostProvider  as provider
+entity      DjangoServer      as server
+
+actor -> ui: click()
+activate ui
+ui -> provider: initFetchNormalPost()
+activate provider
+ui -> ui: build()
+activate ui
+provider -> server: GET api/post/<post_id>/
+activate server
+return response
+alt response = 200
+    create NormalPostModel as npm
+    provider -> npm: <<create>>
+    provider -> provider: normalPostModel = NormalPostModel
+else
+        provider -> provider: normalPostModel = null
+end
+deactivate provider
+ui -> provider: getNormalPostData
+activate provider
+return NormalPostModel
+alt NormalPostModel = null
+    ui -> ui: ErrorView()
+else
+    ui-> ui: ListView()
+end
+

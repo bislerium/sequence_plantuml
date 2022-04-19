@@ -1,0 +1,42 @@
+@startuml uc1-sequence
+skinparam sequenceMessageAlign center
+actor       "Staff"       as actor
+boundary    Browser    as ui
+control     ReportUpdateView  as view
+entity      ReportModel      as model
+database    Database as db
+
+activate ui
+activate view
+view --> ui: review-report-form.html
+actor -> ui: Fill form
+ui -> view: POST web/report/<report_id>/review/
+view -> view: dispatch()
+view -> view: get_object()
+activate view
+view -> model: Report.object.get(pk=report_id)
+activate model
+model -> db: get_query()
+activate db
+return record
+return ReportModel
+deactivate view
+view -> view: form.validate()
+alt validate = false
+    view --> ui: Validation Error
+end
+view -> view: form.update()
+activate view
+view -> model: Report.objects.update()
+activate model
+model -> db: alter_query()
+activate db
+return record
+return Report
+deactivate view
+alt Http Exception
+    view --> ui: HTTP Error
+else
+    view -> view: HttpResponseRedirect()
+    view --> ui: post-reports.html
+end

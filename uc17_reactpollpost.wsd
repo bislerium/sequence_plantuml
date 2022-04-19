@@ -1,0 +1,21 @@
+@startuml uc1-sequence
+skinparam sequenceMessageAlign center
+actor       "Mobile User"       as actor
+boundary    PollPostScreen    as ui
+control     PollPostProvider  as provider
+entity      DjangoServer      as server
+
+activate ui
+actor -> ui: pollOption()
+ui -> provider: pollTheOption(option_id)
+activate provider
+provider -> server: POST api/post/<post_id>/poll/<option_id>/
+activate server
+return response
+return success
+alt success = true
+    ui -> ui: PollBarRevealList()
+else
+    ui -> ui: showSnackBar(Error: true)
+end
+@enduml

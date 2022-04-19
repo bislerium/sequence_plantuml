@@ -1,0 +1,27 @@
+@startuml uc1-sequence
+skinparam sequenceMessageAlign center
+actor       "Mobile User"       as actor
+boundary    NormalPostScreen    as ui
+control     NormalPostProvider  as provider
+entity      DjangoServer      as server
+
+activate ui
+alt upvote
+    actor -> ui: upvoteButton()
+    ui -> provider: toggleReaction(NormalPostReactionType.upVote)
+    activate provider
+    provider -> server: POST api/post/<post_id>/upvote/
+    activate server
+else downvote
+    actor -> ui: downvoteButton()
+    ui -> provider: toggleReaction(NormalPostReactionType.downVote)
+    provider -> server: POST api/post/<post_id>/upvote/
+end
+ui -> ui: updateToggleButton()
+return response
+return success
+alt success = false
+    ui -> ui: resetToggleButton()
+    ui -> ui: showSnackBar(Error: true)
+end
+@enduml

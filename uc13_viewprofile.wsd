@@ -1,0 +1,31 @@
+@startuml uc1-sequence
+skinparam sequenceMessageAlign center
+actor       "Mobile User"       as actor
+boundary    NGOInfoTab    as ui
+control     NGOProvider  as provider
+entity      DjangoServer      as server
+
+activate  ui
+actor -> ui: clickNGO()
+ui -> provider: initFetchNGO(ngo_id)
+activate provider
+ui -> ui: build()
+activate ui
+provider -> server: GET api/ngo/<ngo_id>/
+activate server
+return response
+provider --> ui: success
+deactivate provider
+ui -> provider: getNGO
+activate provider
+return NGOModel
+alt NGOModel = null
+    ui -> ui: ErrorView()
+else
+    ui -> ui: NGOProfile()
+    activate ui
+    create NGOProfile
+    ui-> NGOProfile: <<create>>
+    deactivate ui
+end
+@enduml

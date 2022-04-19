@@ -1,0 +1,22 @@
+@startuml uc1-sequence
+skinparam sequenceMessageAlign center
+actor       "Mobile User"       as actor
+boundary    RequestPostScreen    as ui
+control     RequestPostProvider  as provider
+entity      DjangoServer      as server
+
+activate ui
+actor -> ui: considerRequestButton()
+ui -> provider: participateRequest()
+activate provider
+provider -> server: POST api/post/<post_id>/participate/
+activate server
+return response
+return success
+alt success = true
+    ui -> ui: updateConsiderRequestButton()
+    ui -> ui: showSnackBar()
+else
+    ui -> ui: showSnackBar(Error: true)
+end
+@enduml

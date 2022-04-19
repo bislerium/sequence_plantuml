@@ -1,0 +1,32 @@
+@startuml uc1-sequence
+skinparam sequenceMessageAlign center
+actor       "Mobile User"       as actor
+boundary    PollPostScreen    as ui
+control     PollPostProvider  as provider
+entity      DjangoServer      as server
+
+actor -> ui: click()
+activate ui
+ui -> provider: initFetchPollPost()
+activate provider
+ui -> ui: build()
+activate ui
+provider -> server: GET api/post/<post_id>/
+activate server
+return response
+alt response = 200
+    create NormalPostModel as ppm
+    provider -> ppm: <<create>>
+    provider -> provider: pollPostModel = PollPostModel
+else
+        provider -> provider: pollPostModel = null
+end
+deactivate provider
+ui -> provider: getPollPostData
+activate provider
+return PollPostModel
+alt PollPostModel = null
+    ui -> ui: ErrorView()
+else
+    ui-> ui: ListView()
+end

@@ -1,0 +1,41 @@
+@startuml Manage WeeklyLog
+skinparam sequenceMessageAlign center
+
+actor       "Web User" as actor
+boundary    Browser as ui
+control     HomePageRounter as rpr
+control     AdminHomeview as ahv
+control     StaffHomeView as shv
+database    Database as db
+
+activate ui
+actor -> ui: enter url
+ui -> rpr: GET /
+activate rpr
+rpr -> rpr: checkRequestUser()
+alt user = admin
+    rpr -> ahv: HttpResponseRedirect()
+    activate ahv
+    ahv -> ahv: get_context_data()
+    activate ahv
+    ahv -> db: select_query
+    activate db
+    return records
+    deactivate ahv
+    ahv -> ahv: render_to_response()
+    ahv -> ui: admin-home.html
+    deactivate ahv
+else user = staff
+    rpr -> shv: HttpResponseRedirect()
+    activate shv
+    shv -> shv: get_context_data()
+    activate shv
+    shv -> db: select_query
+    activate db
+    return records
+    deactivate shv
+    shv -> shv: render_to_response()
+    shv -> ui: staff-home.html
+    deactivate shv
+end
+@enduml

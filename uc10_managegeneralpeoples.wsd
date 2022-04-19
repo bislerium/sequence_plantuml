@@ -1,0 +1,64 @@
+@startuml Manage WeeklyLog
+skinparam sequenceMessageAlign center
+
+actor       "Web User" as actor
+boundary    Browser as ui
+control     PeopleReadsView as rsv
+control     PeopleReadView as rv
+control     PeopleUpdateView as uv
+control     PeopleDeleteView as dv
+entity      PeopleModel as model
+database    Database as db
+
+activate ui
+group Read Peoples
+
+    actor -> ui: enter url
+    ui -> rsv: GET web/peoples/
+    activate rsv
+    rsv -> model: People.objects.all()
+    activate model
+    model -> db: select_query()
+    activate db
+    return records
+    return
+    rsv -> rsv: render_to_response()
+    return people-reads.html
+end
+
+
+group Update people
+    uv -> ui: people-update.html
+    activate uv
+    actor -> ui: fill update form
+    ui -> uv: POST web/people/<people_id>/edit/
+    uv -> model: People.objects.update()
+    activate model
+    model -> db: alter_query()
+    activate db
+    deactivate model
+    deactivate db
+    uv --> rv: HttpResponseRedirect()
+    deactivate uv
+    activate rv
+    rv -> ui: people-read.html
+    deactivate rv
+end
+
+group Delete People
+    actor -> ui: click delete button
+    ui -> dv: DELETE web/people/<staff_id>/remove/
+    activate dv
+    dv -> model: People.objects.remove()
+    activate model
+    model -> db: delete_query()
+    activate db
+    deactivate model
+    deactivate db
+    dv --> rsv: HttpResponseRedirect()
+    deactivate dv
+    activate rsv
+    rsv -> ui: people-reads.html
+    deactivate rsv
+end
+@enduml

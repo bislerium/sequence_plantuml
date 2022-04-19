@@ -1,0 +1,42 @@
+@startuml uc1-sequence
+skinparam sequenceMessageAlign center
+actor       "Mobile User"       as actor
+boundary    AuthScreen    as ui
+control     AuthProvider  as provider
+entity      DjangoServer      as server
+
+activate  ui
+ui -> ui: build()
+activate ui
+actor -> ui: enterUsername()
+actor -> ui: enterPassword()
+actor  -> ui: loginButton()
+ui -> provider: login()
+activate provider
+provider -> server: POST api/login/
+activate server
+return response
+alt response = success
+    create AuthModel as am
+    provider -> am: <<create>> as _auth
+    provider -> provider: SessionManager.set(_auth)
+else
+    provider -> provider: _auth = null
+    note left
+        - HTTP Error
+        - Wrong Credential
+        - Deleted Account
+    end note
+end
+ui -> provider: getIsAuth
+return bool
+alt bool == false
+    ui -> ui: showSnackbar(error: true)
+else
+    create HomeScreen as home
+    ui -> home: <<build>>
+    ui -> ui: Navigator.push(HomeScreen)
+    ui -> ui !!: dispose()
+    deactivate ui
+end
+@enduml

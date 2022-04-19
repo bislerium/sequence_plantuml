@@ -1,0 +1,83 @@
+@startuml Manage WeeklyLog
+skinparam sequenceMessageAlign center
+
+actor       Admin as actor
+boundary    Browser as ui
+control     StaffReadsView as rsv
+control     StaffCreateView as cv
+control     StaffReadView as rv
+control     StaffUpdateView as uv
+control     StaffDeleteView as dv
+entity      StaffModel as model
+database    Database as db
+
+activate ui
+group Read Staffs
+
+    actor -> ui: enter url
+    ui -> rsv: GET web/staffs/
+    activate rsv
+    rsv -> model: Staff.objects.all()
+    activate model
+    model -> db: select_query()
+    activate db
+    return records
+    return
+    rsv -> rsv: render_to_response()
+    return staff-reads.html
+end
+
+group Register Staff
+    cv -> ui: staff-create.html
+    activate cv
+    actor -> ui: fill register form
+    ui -> cv: POST web/staffs/add/
+    cv -> model: <<create>>
+    activate model
+    model -> db: insert_query()
+    activate db
+    deactivate model
+    deactivate db
+    cv --> rv: HttpResponseRedirect()
+    deactivate cv
+    activate rv
+    rv -> ui: staff-read.html
+    deactivate rv
+end
+
+
+group Update Staff
+    uv -> ui: staff-update.html
+    activate uv
+    actor -> ui: fill update form
+    ui -> uv: POST web/staff/<staff_id>/edit/
+    uv -> model: Staff.objects.update()
+    activate model
+    model -> db: alter_query()
+    activate db
+    deactivate model
+    deactivate db
+    uv --> rv: HttpResponseRedirect()
+    deactivate uv
+    activate rv
+    rv -> ui: staff-read.html
+    deactivate rv
+end
+
+group Delete Staff
+    actor -> ui: click delete button
+    ui -> dv: DELETE web/staff/<staff_id>/remove/
+    activate dv
+    dv -> model: Staff.objects.remove()
+    activate model
+    model -> db: delete_query()
+    activate db
+    deactivate model
+    deactivate db
+    dv --> rsv: HttpResponseRedirect()
+    deactivate dv
+    activate rsv
+    rsv -> ui: staff-reads.html
+    deactivate rsv
+end
+@enduml

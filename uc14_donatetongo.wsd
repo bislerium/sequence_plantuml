@@ -1,0 +1,31 @@
+@startuml uc1-sequence
+skinparam sequenceMessageAlign center
+actor       "Mobile User"       as actor
+boundary    NGOProfileScreen    as ui
+control     KhaltiScope  as scope
+entity      KhaltiGateway      as gateway
+
+activate  ui
+ui -> ui: showModalBottomSheet()
+activate ui
+actor -> ui: enterDonationAmount()
+actor  -> ui: donateButton()
+ui -> ui: form.validate()
+alt validate = false
+    ui -> ui: validationError()
+else
+    ui -> scope: KhaltiScope.of(context).pay()
+    activate scope
+    scope -> gateway: initiate()\nverify()\nconfirm()
+    activate gateway
+    return response
+    return success
+    alt success = false
+        ui -> ui: showSnackbar(error: true)
+    else
+        ui -> ui: showSnackbar()
+        ui -> ui!!: Navigator.pop()
+    end
+
+end
+@enduml

@@ -1,0 +1,33 @@
+@startuml uc1-sequence
+skinparam sequenceMessageAlign center
+actor       "Mobile User"       as actor
+boundary    PostTail    as ui
+control     PostProvider  as provider
+entity      DjangoServer      as server
+
+activate  ui
+ui -> ui: build()
+activate ui
+actor  -> ui: reportButton()
+ui -> ui: showDialog()
+activate ui
+alt Cancel
+actor -> ui : clickCancel()
+ui -> ui: Navigator.pop()
+deactivate ui
+else Ok
+actor -> ui : clickOk()
+    ui -> provider: report(post_id)
+    activate provider
+    provider -> server: POST api/post/<post_id>/report/
+    activate server
+    return response
+    return success
+    ui -> ui: Navigator.pop()
+    alt success = false
+        ui -> ui: showSnackbar(error: true)
+    else
+         ui -> ui: showSnackbar()
+    end
+end
+activate ui

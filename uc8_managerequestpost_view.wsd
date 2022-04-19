@@ -1,0 +1,32 @@
+@startuml uc1-sequence
+skinparam sequenceMessageAlign center
+actor       "Mobile User"       as actor
+boundary    RequestPostScreen    as ui
+control     RequestPostProvider  as provider
+entity      DjangoServer      as server
+
+actor -> ui: click()
+activate ui
+ui -> provider: initFetchRequestPost()
+activate provider
+ui -> ui: build()
+activate ui
+provider -> server: GET api/post/<post_id>/
+activate server
+return response
+alt response = 200
+    create RequestPostModel as rpm
+    provider -> rpm: <<create>>
+    provider -> provider: requestPostModel = RequestPostModel
+else
+        provider -> provider: requestPostModel = null
+end
+deactivate provider
+ui -> provider: getRequestPostData
+activate provider
+return RequestPostModel
+alt RequestPostModel = null
+    ui -> ui: ErrorView()
+else
+    ui-> ui: ListView()
+end

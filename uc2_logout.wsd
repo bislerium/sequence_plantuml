@@ -1,0 +1,40 @@
+@startuml uc1-sequence
+skinparam sequenceMessageAlign center
+actor       "Mobile User"       as actor
+boundary    SettingPage    as ui
+control     AuthProvider  as provider
+entity      DjangoServer      as server
+
+activate  ui
+ui -> ui: build()
+activate ui
+actor  -> ui: logoutButton()
+ui -> ui: showDialog()
+activate ui
+alt Cancel
+actor -> ui : clickCancel()
+ui -> ui: Navigator.pop()
+deactivate ui
+else Ok
+actor -> ui : clickOk()
+    ui -> provider: logout()
+    activate provider
+    provider -> server: POST api/logout/
+    activate server
+    return response
+    alt response = success
+        provider -> provider: _auth = null
+        provider -> provider: SessionManager.remove(_auth)
+    end
+    return success
+    alt success = false
+        ui -> ui: showSnackbar(error: true)
+    else
+        create AuthScreen as auth
+        ui -> auth: <<build>>
+        ui -> ui: Navigator.push(AuthScreen)
+        ui -> ui !!: dispose()
+        deactivate ui
+    end
+end
+@enduml

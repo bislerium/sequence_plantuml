@@ -1,0 +1,42 @@
+@startuml uc1-sequence
+skinparam sequenceMessageAlign center
+actor       "Mobile User"       as actor
+boundary    NGOPage    as ui
+control     NGOProvider  as provider
+entity      DjangoServer      as server
+
+actor -> ui: click()
+activate  ui
+ui --> provider: fetchNGOintiFetchPosts()
+ui -> ui: build()
+activate ui
+activate provider
+provider -> server: POST api/posts/
+activate server
+return response
+    alt response = success
+        loop response.json.object.count
+            create PostModel as post
+            provider -> post: <<create>>
+            provider -> provider: append()
+        end
+        provider -> provider: _posts = List<PostModel>
+    else
+        provider -> provider: _posts = null
+    end
+ui -> provider: getPostData
+provider --> ui: List<PostModel>
+alt List is null
+    ui -> ui: ErrorView()
+else
+    alt List is empty
+        ui->ui: showEmptyMessage()
+    else
+    ui -> ui: PostList()
+    activate ui
+    create PostList
+    ui -> PostList : <<build>>
+    deactivate ui
+    end
+end
+@enduml

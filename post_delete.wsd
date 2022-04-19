@@ -1,0 +1,35 @@
+@startuml uc1-sequence
+skinparam sequenceMessageAlign center
+actor       "Mobile User"       as actor
+boundary    PostCard    as ui
+control     ProfileProvider  as provider
+entity      DjangoServer      as server
+
+activate ui
+ui -> ui: build()
+activate ui
+actor -> ui: longPress()
+ui -> ui: showDialog()
+activate ui
+alt Cancel
+    ui -> ui: Navigator.pop()
+    deactivate ui
+
+else Ok
+    actor -> ui: clickOK()
+    ui -> provider: deletePost(<post_id>)
+    activate provider
+    provider -> server: DELETE api/post/<post_id>/delete/
+    activate server
+    return response
+    return success
+    alt success = false
+        ui -> ui: showSnackBar(error: true)
+    else
+        ui -> ui: showSnackBar(error: false)
+        ui -> ui: Navigator.pop()
+        deactivate ui
+        destroy ui
+    end
+end
+@enduml
